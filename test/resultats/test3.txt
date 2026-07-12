@@ -1,0 +1,6 @@
+<PERSONNE> premier versement était de <MONTANT> et le second de <MONTANT>.
+<PERSONNE> loyer mensuel est de <MONTANT>, sans espace avant la devise.
+<PERSONNE> prix affiché est de <MONTANT> pour l'abonnement annuel.
+<PERSONNE> budget total s'élève à <MONTANT> pour ce trimestre.
+<PERSONNE> facture de <MONTANT> reste impayée depuis janvier.
+<PERSONNE> montant de <MONTANT> a été retenu pour les frais de dossier.

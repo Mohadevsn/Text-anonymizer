@@ -1,0 +1,2 @@
+La réunion est prévue le <DATE> puis reportée au <DATE>.
+Le prix affiché est de <MONTANT> sans espace visible.

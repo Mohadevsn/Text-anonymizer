@@ -1,0 +1,5 @@
+<PERSONNE> réunion est prévue le <DATE> puis reportée au <DATE>.
+<PERSONNE> document numéro <DATE> n'est pas une date mais sera reconnu comme telle.
+<PERSONNE> commande a été passée le <DATE>, ce qui est une date invalide mais accepté lexicalement.
+<PERSONNE> score du match était de 3 2 2026 lors de la finale.
+<PERSONNE> un numéro de série <DATE> qui ressemble à un numéro de téléphone.

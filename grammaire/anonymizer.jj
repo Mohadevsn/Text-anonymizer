@@ -1,0 +1,159 @@
+/* anonymizer.jj */
+
+options {
+    STATIC = false ;
+}
+
+PARSER_BEGIN(Anonymizer)
+
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.io.IOException;
+
+public class Anonymizer {
+
+    public static void main(String[] args) throws Exception {
+        if (args.length < 2) {
+            System.out.println("Usage: java Anonymizer <fichier_entree> <fichier_sortie>");
+            return;
+        }
+
+        Reader reader = new FileReader(args[0]);
+        Anonymizer parser = new Anonymizer(reader);
+
+        StringBuffer buffer = new StringBuffer();
+
+        try {
+            parser.Start(buffer);
+        } catch (ParseException e) {
+            System.out.println("Erreur d'analyse syntaxique : " + e.getMessage());
+            return;
+        } catch (TokenMgrError e) {
+            System.out.println("Erreur lexicale : " + e.getMessage());
+            return;
+        }
+
+        Writer writer = new FileWriter(args[1]);
+        writer.write(buffer.toString());
+        writer.close();
+
+        System.out.println("Anonymisation terminée. Résultat : " + args[1]);
+    }
+}
+
+PARSER_END(Anonymizer)
+
+
+/* =========================================================
+ * SPECIFICATION LEXICALE (Partie 4)
+ * L'ORDRE DES PRODUCTIONS COMPTE : en cas d'égalité de longueur
+ * (maximal munch), JavaCC choisit la première déclarée.
+ * ========================================================= */
+
+/* --- ARTICLES / MOTS-VIDES EN DEBUT DE PHRASE --- */
+/* A longueur égale, JavaCC choisit le token déclaré en premier  */
+TOKEN : {
+    < ARTICLE : "Le" | "La" | "Les" | "Un" | "Une" | "Des" | "Du"
+              | "Son" | "Sa" | "Ses"
+              | "Ce" | "Cette" | "Ces" | "Cet"
+              | "Il" | "Elle" | "Ils" | "Elles" | "On"
+              | "Je" | "Tu" | "Nous" | "Vous"
+              | "Bonjour" | "Bonsoir" | "Merci" | "Salut" | "Oui" | "Non"
+              | "Monsieur" | "Madame" | "Mr" | "Me" | "Mdm"
+    >
+}
+
+
+/* --- EMAIL --- */
+/* Exemple : local-part@domaine.extension */
+TOKEN : {
+    < EMAIL : (["a"-"z","A"-"Z","0"-"9","_",".","-"])+
+              "@"
+              (["a"-"z","A"-"Z","0"-"9","-"])+
+              ("." (["a"-"z","A"-"Z"])+)+
+    >
+}
+
+/* --- TELEPHONE --- */
+/* Couvrir les formats sénégalais courants, 
+    ex: "77 123 45 67", "771234567", "+221 77 123 45 67" */
+TOKEN : {
+    < PHONE : ("+221" (" ")?)?
+              ("77" | "76" | "75" | "78" | "70" | "33" | "32" | "31") (" ")?
+              (["0"-"9"]){3} (" ")?
+              (["0"-"9"]){2} (" ")?
+              (["0"-"9"]){2}
+    >
+}
+
+/* --- DATE --- */
+TOKEN : {
+    < DATE : (["0"-"9"]){2} "/" (["0"-"9"]){2} "/" (["0"-"9"]){4} 
+            | (["0"-"9"]){2} " " (["0"-"9"]){2} " " (["0"-"9"]){4} >
+}
+
+/* --- MONTANT --- */
+TOKEN : {
+    < AMOUNT : (["0"-"9"])+ ("." (["0"-"9"])+)? (" ")? ("FCFA" | "CFA" | "F" | "$" | "€") >
+}
+
+/* --- NOM PROPRE (PERSON) --- */
+/* Mot commençant par une majuscule. Doit être déclaré AVANT WORD
+   pour gagner en cas d'égalité de longueur (maximal munch). */
+TOKEN : {
+    < PERSON : ["A"-"Z"] (["a"-"z"])*
+    >
+}
+
+/* --- MOT (WORD) --- */
+/* Tout autre mot (ne commençant pas par une majuscule) */
+TOKEN : {
+    < WORD : ["a"-"z"] (["a"-"z"])*
+    >
+}
+/* --- AUTRES CARACTERES (OTHER) --- */
+/* Catch-all : garantit qu'aucun caractère ne provoque de TokenMgrError.
+   Doit rester en dernier. */
+TOKEN : {
+    < OTHER : ~[]
+    >
+}
+
+
+/* =========================================================
+ * SPECIFICATION SYNTAXIQUE (Partie 6)
+ * Grammaire acceptant toute suite valide de tokens.
+ * Start -> (EMAIL | PHONE | DATE | AMOUNT | PERSON | WORD | OTHER)* EOF
+ * ========================================================= */
+
+void Start(StringBuffer buffer) :
+{
+    Token t;
+}
+{
+    (
+        t = < ARTICLE >
+        { buffer.append(t.image);} 
+        |
+        t = < EMAIL >
+        { buffer.append("<EMAIL>"); }
+        |
+        t = < PHONE >
+        { buffer.append("<TELEPHONE>"); }
+        |
+        t = < DATE >
+        { buffer.append("<DATE>"); }
+        |
+        t = < AMOUNT >
+        { buffer.append("<MONTANT>"); }
+        |
+        t = < PERSON >
+        { buffer.append("<PERSONNE>"); }
+        |
+        ( t = < WORD > | t = < OTHER > )
+        { buffer.append(t.image); }
+    )*
+    <EOF>
+}

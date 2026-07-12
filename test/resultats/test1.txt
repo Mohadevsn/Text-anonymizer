@@ -1,0 +1,3 @@
+<PERSONNE> <PERSONNE> <PERSONNE> est joignable au <TELEPHONE>.
+<PERSONNE> adresse est <EMAIL>.
+<PERSONNE> paiement de <MONTANT> a été effectué le <DATE>.

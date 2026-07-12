@@ -1,0 +1,3 @@
+Monsieur <PERSONNE> <PERSONNE> est joignable au <TELEPHONE>.
+Son adresse est <EMAIL>.
+Le paiement de <MONTANT> a été effectué le <DATE>.
