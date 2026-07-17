@@ -3,7 +3,9 @@
 **M1 GLSI — ESP/UCAD — 2025-2026**
 Date début : 12/07/2026 — Date fin : 18/07/2026
 
-> ⚠️ Rappel : les **Parties 1 à 4** et l'**Implémentation (Partie 7)** sont strictement notées. Les autres parties (5, 6, 8, 9, 10) restent à faire mais avec moins de pression.
+Projet réalisé par **Ibrahim Dan Azoumi**, **Ramatoulaye Fall** et **Mohamed Wade**.
+Les 10 parties du sujet sont couvertes ; le détail de chacune (méthode, choix,
+limites assumées) est dans les documents listés en [Documentation](#documentation).
 
 ## Description
 
@@ -20,6 +22,10 @@ Date début : 12/07/2026 — Date fin : 18/07/2026
 | Autre mot / caractère | ponctuation, mots courants | recopié tel quel |
 
 La grammaire complète (tokens + règle de départ) est définie dans [`grammaire/anonymizer.jj`](grammaire/anonymizer.jj).
+
+Certains comportements limites sont volontairement documentés plutôt que masqués
+(ex. noms tout en majuscules, accents, email collé au mot suivant) — voir
+[`docs/maximal-munch.md`](docs/maximal-munch.md) et [`docs/analyse-finale.md`](docs/analyse-finale.md).
 
 ## Prérequis
 
@@ -57,58 +63,63 @@ Les jeux d'essais se trouvent dans `test/*.txt`, avec les sorties attendues dans
 ./scripts/test.sh test2
 ```
 
-Chaque test produit sa sortie et son log dans `test/resultats/`, comparés au fichier attendu correspondant dans `test/expected/` lorsqu'il existe.
+Chaque test produit sa sortie et son log dans `test/resultats/`, comparés au fichier attendu correspondant dans `test/expected/` lorsqu'il existe. Détail des 5 jeux d'essai, de leur objectif et des résultats obtenus : [`docs/validation.md`](docs/validation.md).
 
-## Répartition des tâches et fichiers
+## Instrumentation (Partie 8)
 
-| Membre | Parties à charge | Fichier(s) à produire | Contenu attendu |
+`tools/TokenDump.java` affiche, pour un fichier donné, le type de token, sa position et le lexème exact reconnu par le lexer généré — sans passer par le parseur, donc sans effet sur l'anonymisation elle-même.
+
+```bash
+./scripts/trace.sh <fichier_entree>
+```
+
+Détails et exemples de sortie : [`docs/instrumentation.md`](docs/instrumentation.md).
+
+## Documentation
+
+| Partie | Sujet | Fichier(s) | Auteur(s) |
 |---|---|---|---|
-| **Ibrahim Dan Azoumi** | Partie 1 + Partie 2 + Partie 5 | `docs/etude-du-probleme.md`<br>`docs/regex.md` <br> `docs/maximal-munch.md` | - Catégories d'infos à anonymiser<br>- Règles de reconnaissance<br>- Difficultés possibles<br>- Expressions régulières (email, tél, date, montant, mot, autres)<br>- Justification des choix<br>- Étude du Maximal Munch sur plusieurs chaînes<br> |
-| **Ramatoulaye Fall** | Partie 3 | `docs/automates.md`<br>`docs/automates/` (schémas)<br> | - Automates de reconnaissance (email, tél, date)<br>- États, transitions, états finaux + tableaux<br>- Conflits lexicaux identifiés et expliqués |
-| **Moi (Mohamed)** | Partie 4 + Partie 6 + **Partie 7** | `grammar/anonymizer.jj`<br>`src/`<br>`docs/analyse-lexicale.md` | - Définition des tokens EMAIL, PHONE, DATE, AMOUNT, PERSON, WORD, OTHER<br>- Règles lexicales JavaCC<br>- Grammaire syntaxique (Partie 6)<br>- **Implémentation complète** : lecture fichier, génération tokens, anonymisation, écriture fichier de sortie |
-
-## Fait à trois (après que le code soit stable)
-
-| Parties | Fichier(s) | Contenu |
-|---|---|---|
-| Partie 8 | `docs/instrumentation.md` | Affichage type de token + lexème reconnu |
-| Partie 9 | `tests/` + `docs/validation.md` | Jeux d'essais (plusieurs documents), tableau récapitulatif des résultats |
-| Partie 10 | `docs/analyse-finale.md` | Performances, limites, rôle du Maximal Munch, améliorations possibles |
+| 1 | Étude du problème (catégories, règles, difficultés) | [`docs/etude-du-probleme.md`](docs/etude-du-probleme.md) | Ibrahim Dan Azoumi |
+| 2 | Expressions régulières | [`docs/regex.md`](docs/regex.md) | Ibrahim Dan Azoumi |
+| 3 | Automates finis (email, téléphone, date) | [`docs/automates.md`](docs/automates.md), [`docs/automates/`](docs/automates/) | Ramatoulaye Fall |
+| 4 + 6 | Spécification lexicale et grammaire syntaxique JavaCC | [`docs/analyse-lexicale.md`](docs/analyse-lexicale.md), [`grammaire/anonymizer.jj`](grammaire/anonymizer.jj) | Mohamed Wade |
+| 5 | Étude du Maximal Munch sur plusieurs chaînes | [`docs/maximal-munch.md`](docs/maximal-munch.md) | Ibrahim Dan Azoumi |
+| 7 | Implémentation complète (lecture, tokenisation, anonymisation, écriture) | [`src/`](src/) (généré depuis `anonymizer.jj`) | Mohamed Wade |
+| 8 | Instrumentation : affichage type de token + lexème | [`docs/instrumentation.md`](docs/instrumentation.md), [`tools/TokenDump.java`](tools/TokenDump.java) | Équipe |
+| 9 | Validation : jeux d'essais et tableau récapitulatif | [`docs/validation.md`](docs/validation.md), [`test/`](test/) | Équipe |
+| 10 | Analyse finale : performances, limites, rôle du Maximal Munch, améliorations | [`docs/analyse-finale.md`](docs/analyse-finale.md) | Équipe |
 
 ## Structure du dépôt
 
 ```
 text-anonymizer/
 ├── grammaire/
-│   └── anonymizer.jj              ← Moi (Partie 4 + 6 + 7) : grammaire JavaCC source
+│   └── anonymizer.jj              ← Grammaire JavaCC source (Parties 4 + 6 + 7)
 ├── src/                            ← Généré par build.sh à partir de anonymizer.jj (ne pas éditer à la main)
 ├── class/                          ← Fichiers .class compilés (généré par build.sh)
+├── tools/
+│   └── TokenDump.java             ← Outil d'instrumentation (Partie 8)
 ├── scripts/
 │   ├── build.sh                   ← génère + compile (+ exécute avec `run`)
-│   └── test.sh                    ← exécute les jeux d'essais et compare aux sorties attendues
-├── test/                           ← Équipe (Partie 9)
+│   ├── test.sh                    ← exécute les jeux d'essais et compare aux sorties attendues
+│   └── trace.sh                   ← compile + exécute TokenDump sur un fichier
+├── test/                           ← Jeux d'essai (Partie 9)
 │   ├── test1_base.txt ... test5_faux_positifs_negatifs.txt
 │   ├── expected/                  ← sorties de référence par test
 │   └── resultats/                 ← sorties + logs générés par test.sh
 ├── docs/
-│   ├── etude-du-probleme.md       ← Ibrahim Dan Azoumi (Partie 1)
-│   ├── regex.md                   ← Ibrahim Dan Azoumi (Partie 2)
-│   ├── automates.md               ← Ramatoulaye Fall (Partie 3)
-│   ├── automates/                 ← Ramatoulaye Fall (schémas, Partie 3)
-│   ├── maximal-munch.md           ← Ibrahim Dan Azoumi (Partie 5)
-│   ├── analyse-lexicale.md        ← Moi (Partie 4 + 6)
-│   ├── instrumentation.md         ← Équipe (Partie 8)
-│   ├── validation.md              ← Équipe (Partie 9)
-│   ├── analyse-finale.md          ← Équipe (Partie 10)
-│   └── rapport-final.md           ← Assemblage final (tout le monde relit)
+│   ├── etude-du-probleme.md       ← Partie 1
+│   ├── regex.md                   ← Partie 2
+│   ├── automates.md               ← Partie 3
+│   ├── automates/                 ← Partie 3 (schémas email/téléphone/date)
+│   ├── maximal-munch.md           ← Partie 5
+│   ├── analyse-lexicale.md        ← Parties 4 + 6
+│   ├── instrumentation.md         ← Partie 8
+│   ├── validation.md              ← Partie 9
+│   └── analyse-finale.md          ← Partie 10
 └── README.md
 ```
 
-> Note : `docs/regex.md`, `docs/automates/` et les autres livrables docs listés ci-dessus sont encore vides à ce stade — à compléter par les personnes en charge.
+## Limites connues et pistes d'amélioration
 
-## Règles de collaboration
-
-- **Un seul fichier `.jj`** : c'est moi (Mohamed) qui le porte pour éviter les conflits Git. Si vous avez des regex ou tokens à proposer, envoyez-les moi en clair (pas de commit direct sur `anonymizer.jj`) et je les intègre.
-- Chacun committe uniquement dans son propre dossier/fichier `docs/*.md`.
-- Le `rapport-final.md` est assemblé en tout dernier, une fois toutes les parties individuelles validées.
-- Jeux d'essais à préparer dès que possible (idéalement dès le début de semaine) pour servir de tests pendant le développement.
+Le projet documente volontairement plusieurs comportements imparfaits plutôt que de les masquer (noms tout en majuscules, accents non couverts, email sans borne de longueur, liste d'articles nécessairement incomplète...). La liste complète, avec pour chacune l'origine exacte et une piste de correction, est dans [`docs/analyse-finale.md`](docs/analyse-finale.md).
